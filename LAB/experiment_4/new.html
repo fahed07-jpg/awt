@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="exp4App">
+<head>
+  <meta charset="UTF-8">
+  <title>Bill Payment Record</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="app.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 8px; text-align: left; }
+    button { margin-right: 5px; }
+  </style>
+</head>
+<body ng-controller="BillPaymentCtrl">
+
+  <h2>Bill Payment Records</h2>
+
+  <form ng-submit="addBill()">
+    <input type="text" ng-model="newBill.name" placeholder="Name" required>
+    <input type="number" ng-model="newBill.amount" placeholder="Amount" required>
+    <input type="date" ng-model="newBill.date" required>
+    <button type="submit">Add Bill</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="bill in bills">
+        <td>
+          <span ng-if="!bill.editing">{{bill.name}}</span>
+          <input ng-if="bill.editing" type="text" ng-model="bill.name">
+        </td>
+        <td>
+          <span ng-if="!bill.editing">{{bill.amount}}</span>
+          <input ng-if="bill.editing" type="number" ng-model="bill.amount">
+        </td>
+        <td>
+          <span ng-if="!bill.editing">{{bill.date | date:'yyyy-MM-dd'}}</span>
+          <input ng-if="bill.editing" type="date" ng-model="bill.date">
+        </td>
+        <td>
+          <button ng-if="!bill.editing" ng-click="editBill(bill)">Edit</button>
+          <button ng-if="bill.editing" ng-click="saveBill(bill)">Save</button>
+          <button ng-click="deleteBill($index)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

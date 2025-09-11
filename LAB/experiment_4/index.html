@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="exp4App">
+<head>
+  <meta charset="UTF-8">
+  <title>Registration Form</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="app.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form { max-width: 400px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+    .error { color: red; font-size: 0.9em; }
+    input.ng-invalid.ng-touched { border-color: red; }
+    input.ng-valid.ng-touched { border-color: green; }
+  </style>
+</head>
+<body ng-controller="RegistrationCtrl">
+
+  <h2>User Registration</h2>
+
+  <form name="regForm" ng-submit="register()" novalidate>
+    <!-- Name -->
+    <label>Name:</label><br>
+    <input type="text" name="name" ng-model="user.name" required minlength="3" ng-pattern="/^[a-zA-Z ]+$/"><br>
+    <div class="error" ng-if="regForm.name.$touched && regForm.name.$error.required">
+      Name is required.
+    </div>
+    <div class="error" ng-if="regForm.name.$touched && regForm.name.$error.minlength">
+      Name must be at least 3 characters.
+    </div>
+    <div class="error" ng-if="regForm.name.$touched && regForm.name.$error.pattern">
+      Only letters and spaces are allowed.
+    </div>
+
+    <!-- Email -->
+    <label>Email:</label><br>
+    <input type="email" name="email" ng-model="user.email" required><br>
+    <div class="error" ng-if="regForm.email.$touched && regForm.email.$error.required">
+      Email is required.
+    </div>
+    <div class="error" ng-if="regForm.email.$touched && regForm.email.$error.email">
+      Invalid email format.
+    </div>
+
+    <!-- Password -->
+    <label>Password:</label><br>
+    <input type="password" name="password" ng-model="user.password" required minlength="6"><br>
+    <div class="error" ng-if="regForm.password.$touched && regForm.password.$error.required">
+      Password is required.
+    </div>
+    <div class="error" ng-if="regForm.password.$touched && regForm.password.$error.minlength">
+      Password must be at least 6 characters.
+    </div>
+
+    <br>
+    <button type="submit" ng-disabled="regForm.$invalid">Register</button>
+  </form>
+
+  <h3>Preview:</h3>
+  <pre>{{user | json}}</pre>
+
+</body>
+</html>
