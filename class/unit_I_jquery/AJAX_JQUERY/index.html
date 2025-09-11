@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AJAX jQuery Example</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+  <button id="btn1">Get from txt</button>
+  <button id="btn2">Get from json</button>
 
-    <div id="placeholder">  </div>    
-    <script>
-        $.getJSON("data.json", function(data) {
-  console.log(data);
-  $("#placeholder").html(data[0].name)
-});
-    </script>
+  <div id="placeholder"></div>
+
+  <script>
+    $("#btn1").click(function() {
+      $.get("data.txt", function(data) {
+        console.log(data);
+        $("#placeholder").text(data);
+      }).fail(function(err) {
+        console.error("Error loading data.txt", err);
+        $("#placeholder").text("Failed to load data.txt");
+      });
+    });
+    $("#btn2").click(function() {
+      $.getJSON("data.json", function(data) {
+        console.log(data);
+        if (Array.isArray(data) && data.length > 0) {
+          // Show both name and age for each entry
+          var info = data.map(function(item) { 
+            return item.name + " (" + item.age + ")"; 
+          });
+          $("#placeholder").text(info.join(", "));
+        };
+      })
+      });
+  </script>
 </body>
 </html>
