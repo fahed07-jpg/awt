@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 1 - jQuery Implementation</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #scrollTopImg { cursor: pointer; width: 50px; position: fixed; bottom: 20px; right: 20px; }
+        #messageDiv { display: none; padding: 10px; border: 1px solid #333; margin-top: 10px; }
+        table { border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid black; padding: 8px; }
+        section { height: 500px; border: 1px dashed gray; margin-bottom: 20px; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Experiment 1: jQuery Basics</h1>
+
+    <!-- Task 1 Demo -->
+    <p><b>Task 1:</b> Right-click, text selection, and Ctrl+C are disabled on this page.</p>
+
+    <!-- Task 2 Demo -->
+    <section id="section1">
+        <h2>Section 1</h2>
+        <p>Scroll down to see Section 2.</p>
+    </section>
+
+    <section id="section2">
+        <h2>Section 2</h2>
+        <button id="scrollBtn">Scroll Back to Section 2</button>
+    </section>
+
+    <img id="scrollTopImg" src="https://cdn-icons-png.flaticon.com/512/892/892692.png" alt="Top" title="Scroll to Top">
+
+    <!-- Task 3 Demo -->
+    <h2>Task 3: Hover over paragraphs</h2>
+    <p>This is paragraph one.</p>
+    <p>This is paragraph two.</p>
+    <p>This is paragraph three.</p>
+
+    <h2>Hover over table rows</h2>
+    <table>
+        <tr><th>Name</th><th>Age</th></tr>
+        <tr><td>Fahed</td><td>22</td></tr>
+        <tr><td>Nilesh</td><td>25</td></tr>
+    </table>
+
+    <!-- Task 4 Demo -->
+    <h2>Task 4: Show/Hide Message</h2>
+    <button id="showBtn">Show Message</button>
+    <button id="hideBtn">Hide Message</button>
+    <button id="toggleBtn">Toggle Message</button>
+    <button id="fadeInBtn">Fade In</button>
+    <button id="fadeOutBtn">Fade Out</button>
+    <div id="messageDiv">Hello! This is a hidden message.</div>
+
+    <!-- Script -->
+    <script>
+        $(document).ready(function() {
+            // Task 1: Disable Right-Click, Selection, and Ctrl+C
+            $(document).on("contextmenu", function(e) { e.preventDefault(); });
+            $(document).on("selectstart", function(e) { e.preventDefault(); });
+            $(document).on("keydown", function(e) {
+                if (e.ctrlKey && e.keyCode === 67) e.preventDefault();
+            });
+
+            // Task 2: Scroll to Top and Section
+            $("#scrollTopImg").click(function() {
+                $("html, body").animate({ scrollTop: 0 }, 500);
+            });
+            $("#scrollBtn").click(function() {
+                $("html, body").animate({ scrollTop: $("#section2").offset().top }, 500);
+            });
+
+            // Task 3: Change Paragraph Color & Highlight Table Row
+            $("p").hover(
+                function() { $(this).css("color", "red"); },
+                function() { $(this).css("color", ""); }
+            );
+            $("tr").hover(
+                function() { $(this).css("background", "yellow"); },
+                function() { $(this).css("background", ""); }
+            );
+
+            // Task 4: Show/Hide/Toggle/Fade
+            $("#showBtn").click(function() { $("#messageDiv").show(); });
+            $("#hideBtn").click(function() { $("#messageDiv").hide(); });
+            $("#toggleBtn").click(function() { $("#messageDiv").toggle(); });
+            $("#fadeInBtn").click(function() { $("#messageDiv").fadeIn(); });
+            $("#fadeOutBtn").click(function() { $("#messageDiv").fadeOut(); });
+        });
+    </script>
+
+</body>
+</html>
