@@ -14,8 +14,8 @@ Experiment Index</h2>
 4.  **Experiment 4:** Angular JS Forms and Events
 5.  **Experiment 5 & 6:** Node JS Basics
 6.  **Experiment 7:** Cookie and Sessions in nodejs
-
-## Experiment 1
+7.  **Experiment 8 & 9:**  Todo App- Mongodb,Nodejs Express
+8.  **Experiment 10:** D3JS Graphs and Charts
 
 
 ## Experiment 1
@@ -815,3 +815,332 @@ Experiment Index</h2>
 
 6. **Challenges Faced**  
    Resolving port conflicts between the cookie and session servers and ensuring session persistence across requests were initial difficulties.
+
+ # Web Development Lab Record: Experiments 8, 9 & 10
+ 
+ ---
+ 
+ ## Experiment 8 & 9: Full-Stack Todo List Application
+ 
+ ### 1. Aim
+ To develop a full-stack Todo List application using **Node.js**, **Express**, and **MongoDB (Mongoose)**, featuring user authentication (Register/Login) and **CRUD** operations for tasks.
+ 
+ ### 2. Brief Description
+ This project integrates the frontend and backend. It uses MongoDB to store user credentials and tasks. The backend (Node/Express) exposes APIs for signing up, logging in, and managing todos. The frontend uses AJAX/Fetch API to interact with the backend, allowing users to maintain their own private todo lists.
+ 
+ ### 3. Explanation
+ I organized the project into **MVC architecture**. 
+ * **Models:** The `models` folder contains Mongoose schemas for Users and Todos.
+ * **Controller/Routes:** `server.js` handles the database connection and API routes.
+ * **Views/Client:** The `public` folder contains the HTML views and client-side logic (`app.js`).
+ 
+ When a user logs in, a session or token is used to identify them and fetch only their specific tasks from the MongoDB database.
+ 
+ ### 4. Code Implementation
+ 
+ **File: `models/todo.js`**
+ ```javascript
+ const mongoose = require('mongoose');
+ 
+ const TodoSchema = new mongoose.Schema({
+     task: { type: String, required: true },
+     completed: { type: Boolean, default: false },
+     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Link to user
+ });
+ 
+ module.exports = mongoose.model('Todo', TodoSchema);
+ ```
+ ***File: models/user.js***
+ 
+ ``` javaScript
+ 
+ const mongoose = require('mongoose');
+ 
+ const UserSchema = new mongoose.Schema({
+     username: { type: String, required: true, unique: true },
+     password: { type: String, required: true }
+ });
+ 
+ module.exports = mongoose.model('User', UserSchema);
+ ```
+ ***File: server.js***
+ 
+ ``` javaScript
+ 
+ const express = require('express');
+ const mongoose = require('mongoose');
+ const bodyParser = require('body-parser');
+ const path = require('path');
+ const User = require('./models/user');
+ const Todo = require('./models/todo');
+ 
+ const app = express();
+ 
+ app.use(bodyParser.json());
+ app.use(express.static('public'));
+ 
+ // Connect to MongoDB
+ mongoose.connect('mongodb://127.0.0.1:27017/todoapp')
+     .then(() => console.log("MongoDB Connected"))
+     .catch(err => console.log(err));
+ 
+ // --- ROUTES ---
+ 
+ // Register
+ app.post('/api/register', async (req, res) => {
+     const { username, password } = req.body;
+     try {
+         const user = new User({ username, password });
+         await user.save();
+         res.json({ success: true, message: "Registered successfully" });
+     } catch (error) {
+         res.status(400).json({ success: false, error: "Username already exists" });
+     }
+ });
+ 
+ // Login (Simplified for demo)
+ app.post('/api/login', async (req, res) => {
+     const { username, password } = req.body;
+     const user = await User.findOne({ username, password });
+     if (user) {
+         res.json({ success: true, userId: user._id });
+     } else {
+         res.status(401).json({ success: false, error: "Invalid credentials" });
+     }
+ });
+ 
+ // Get Todos
+ app.get('/api/todos/:userId', async (req, res) => {
+     const todos = await Todo.find({ userId: req.params.userId });
+     res.json(todos);
+ });
+ 
+ // Add Todo
+ app.post('/api/todos', async (req, res) => {
+     const { task, userId } = req.body;
+     const todo = new Todo({ task, userId });
+     await todo.save();
+     res.json(todo);
+ });
+ 
+ // Delete Todo
+ app.delete('/api/todos/:id', async (req, res) => {
+     await Todo.findByIdAndDelete(req.params.id);
+     res.json({ success: true });
+ });
+ 
+ app.listen(3000, () => console.log('Server running on port 3000'));
+ ```
+ ***File: public/app.js (Client-side Logic)***
+ 
+ ```javaScript
+ 
+ let currentUserId = localStorage.getItem('userId');
+ 
+ // If on todolist page, load todos
+ if (window.location.pathname.includes('todolist.html')) {
+     if (!currentUserId) window.location.href = 'login.html';
+     loadTodos();
+ }
+ 
+ // Login Logic
+ $('#loginForm').on('submit', function(e) {
+     e.preventDefault();
+     const username = $('#username').val();
+     const password = $('#password').val();
+ 
+     $.ajax({
+         url: '/api/login',
+         method: 'POST',
+         contentType: 'application/json',
+         data: JSON.stringify({ username, password }),
+         success: function(res) {
+             localStorage.setItem('userId', res.userId);
+             window.location.href = 'todolist.html';
+         },
+         error: function() { alert('Invalid Login'); }
+     });
+ });
+ 
+ // Load Todos Function
+ function loadTodos() {
+     $.get(`/api/todos/${currentUserId}`, function(todos) {
+         $('#list').empty();
+         todos.forEach(todo => {
+             $('#list').append(`
+                 <li>${todo.task} <button onclick="deleteTodo('${todo._id}')">X</button></li>
+             `);
+         });
+     });
+ }
+ 
+ // Add Todo Logic
+ $('#addBtn').click(function() {
+     const task = $('#taskInput').val();
+     $.ajax({
+         url: '/api/todos',
+         method: 'POST',
+         contentType: 'application/json',
+         data: JSON.stringify({ task, userId: currentUserId }),
+         success: function() {
+             $('#taskInput').val('');
+             loadTodos();
+         }
+     });
+ });
+ 
+ // Delete Todo Function
+ window.deleteTodo = function(id) {
+     $.ajax({
+         url: `/api/todos/${id}`,
+         method: 'DELETE',
+         success: loadTodos
+     });
+ };
+ ```
+ 5. ***Output Screenshots***
+     <p><strong>Output:</strong></p>
+ ![Experiment 8_9 Code](./images/exp9.1.png)
+ 
+     <p><strong>Output:</strong></p>
+ ![Experiment 8_9 Code](./images/exp9.2.png)
+ 
+     <p><strong>Output:</strong></p>
+ ![Experiment 8_9](./images/exp9.3.png)
+ 
+     <p><strong>Output:</strong></p>
+ ![Experiment 8_9](./images/exp9.3.png)
+ 
+ 6. ***Learning Outcomes & Challenges***
+ What I Learned: I learned how to connect a Node.js application to a MongoDB database using Mongoose. I understood how to define schemas, create relationships between collections (Users and Todos), and handle asynchronous database operations using async/await.
+ 
+ ***Challenges Faced:***
+  Connecting the frontend AJAX calls to the correct backend API routes and handling CORS issues (though serving static files resolved this) were initial challenges. Managing the user session (storing the User ID) to ensure users only see their own todos was also a key learning point.
+ 
+ 
+ #***Experiment 10: Data Visualization with D3.js***
+ 1. Aim
+ To visualize data using the D3.js library by parsing a CSV file and creating a bar chart.
+ 
+ 2. Brief Description
+ This experiment uses D3.js (Data-Driven Documents) to bind data from an external data.csv file to the DOM. I set up a simple Node.js server to serve the static files and used D3 methods to create SVG rectangles representing the data values.
+ 
+ 3. Explanation
+ The setup includes a data.csv file containing categories and values. The script.js uses d3.csv() to load the data asynchronously. I defined a linear scale for the Y-axis (height of bars) and a band scale for the X-axis (categories). SVG elements were appended to the HTML body to render the visualization.
+ 
+ 4. Code Implementation
+ 
+ ***File: public/data.csv***
+ 
+ Code snippet
+ ```csv
+ Language,Users
+ JavaScript,100
+ Python,85
+ Java,70
+ C++,60
+ Go,40
+ ```
+ ***File: public/index.html***
+ 
+ ```html
+ 
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <title>D3.js Bar Chart</title>
+     <script src="[https://d3js.org/d3.v7.min.js](https://d3js.org/d3.v7.min.js)"></script>
+     <style>
+         .bar { fill: steelblue; }
+         .bar:hover { fill: orange; }
+         svg { background-color: #f4f4f4; margin: 20px; }
+         text { font-family: sans-serif; font-size: 12px; }
+     </style>
+ </head>
+ <body>
+     <h2 align="center">Programming Language Popularity (D3.js)</h2>
+     <div id="chart"></div>
+     <script src="script.js"></script>
+ </body>
+ </html>
+ ```
+ ***File: public/script.js***
+ 
+ ```javaScript
+ 
+ // Set dimensions
+ const width = 500, height = 300, margin = 40;
+ 
+ // Create SVG container
+ const svg = d3.select("#chart")
+     .append("svg")
+     .attr("width", width)
+     .attr("height", height);
+ 
+ // Load data
+ d3.csv("data.csv").then(data => {
+ 
+     // Convert strings to numbers
+     data.forEach(d => d.Users = +d.Users);
+ 
+     // X Scale
+     const x = d3.scaleBand()
+         .domain(data.map(d => d.Language))
+         .range([margin, width - margin])
+         .padding(0.1);
+ 
+     // Y Scale
+     const y = d3.scaleLinear()
+         .domain([0, d3.max(data, d => d.Users)])
+         .range([height - margin, margin]);
+ 
+     // Draw Bars
+     svg.selectAll(".bar")
+         .data(data)
+         .enter()
+         .append("rect")
+         .attr("class", "bar")
+         .attr("x", d => x(d.Language))
+         .attr("y", d => y(d.Users))
+         .attr("width", x.bandwidth())
+         .attr("height", d => height - margin - y(d.Users));
+ 
+     // Add X Axis
+     svg.append("g")
+         .attr("transform", `translate(0,${height - margin})`)
+         .call(d3.axisBottom(x));
+ 
+     // Add Y Axis
+     svg.append("g")
+         .attr("transform", `translate(${margin},0)`)
+         .call(d3.axisLeft(y));
+ });
+ ```
+ ***File: server.js (Static Server)***
+ 
+ ```javaScript
+ 
+ const express = require('express');
+ const app = express();
+ const path = require('path');
+ 
+ app.use(express.static('public'));
+ 
+ app.get('/', (req, res) => {
+     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+ });
+ 
+ app.listen(4000, () => {
+     console.log('D3 Server running at http://localhost:4000');
+ });
+ ```
+ 5. Output Screenshot
+ ![Experiment 10 Code](./images/exp10.png)
+ 
+ 
+ 6. Learning Outcomes & Challenges
+ What I Learned: I learned how to use the D3.js library to manipulate the DOM based on data. I understood the concept of "Enter, Update, Exit" selections, how to create scaling functions (scaleLinear, scaleBand) to map data values to pixel coordinates, and how to render SVG shapes dynamically.
+ 
+ Challenges Faced: The main challenge was understanding that d3.csv is asynchronous (Promise-based) and that the CSV data needs to be parsed (converting numeric strings to actual numbers using the + operator) before using it in calculations. Also, handling the coordinate system (where y=0 is at the top) required careful calculation for bar heights.
+ 
